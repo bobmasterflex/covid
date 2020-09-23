@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Line Chart</title>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="Chart.min.js"></script>
+	<script src="utils.js"></script>
+	<script>
+	var allStateCodes = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}	
+	</script>
+	<style>
+	canvas{
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+	}
+	</style>
+</head>
+
+<body>
+	<div style="width:95%;" id="allCharts">
+		<a href="#" onclick="toggle(window.BasicChart);return false;">Toggle Daily Deaths</a><br>
+		<a href="#" onclick="turnOn(window.BasicChart);return false;">All On - Daily Deaths</a><br>
+		<a href="#" onclick="turnOff(window.BasicChart);return false;">All Off - Daily Deaths</a>
+		<canvas id="canvasEveryone" style="height:700px;width=100%"></canvas>
+		<a href="#" onclick="toggle(window.PerCapitaChart);return false;">Toggle Total Per 100,000</a><br>
+		<a href="#" onclick="turnOn(window.PerCapitaChart);return false;">All On - Total Per 100,000</a><br>
+		<a href="#" onclick="turnOff(window.PerCapitaChart);return false;">All Off - Total Per 100,000</a>
+		<canvas id="canvasEveryonePerCapita" style="height:700px;width=100%"></canvas>
+		<a href="#" onclick="toggle(window.newDeathsPerMillionChart);return false;">Toggle New Deaths Per Million (Past 7 days)</a><br>
+		<a href="#" onclick="turnOn(window.newDeathsPerMillionChart);return false;">All On - New Deaths Per Million (Past 7 days)</a><br>
+		<a href="#" onclick="turnOff(window.newDeathsPerMillionChart);return false;">All Off - New Deaths Per Million (Past 7 days)</a>
+		<canvas id="canvasEveryoneNDPM" style="height:700px;width=100%"></canvas>
+	</div>
+	<br>
+	<br>
+	<script>
+toggle = function(myChart){
+  for (var i = 0; i < myChart.data.datasets.length; i++){
+    myChart.getDatasetMeta(i).hidden = !myChart.getDatasetMeta(i).hidden;
+  }
+  myChart.update();
+}
+turnOn = function(myChart){
+  for (var i = 0; i < myChart.data.datasets.length; i++){
+    myChart.getDatasetMeta(i).hidden = false;
+  }
+  myChart.update();
+}
+turnOff = function(myChart){
+  for (var i = 0; i < myChart.data.datasets.length; i++){
+    myChart.getDatasetMeta(i).hidden = true;
+  }
+  myChart.update();
+}
+window.statepop = Array();
+statepop['CA'] =39512223
+statepop['TX'] =28995881
+statepop['FL'] =21477737
+statepop['NY'] =19453561
+statepop['PA'] =12801989
+statepop['IL'] =12671821
+statepop['OH'] =11689100
+statepop['GA'] =10617423
+statepop['NC'] =10488084
+statepop['MI'] =9986857
+statepop['NJ'] =8882190
+statepop['VA'] =8535519
+statepop['WA'] =7614893
+statepop['AZ'] =7278717
+statepop['MA'] =6949503
+statepop['TN'] =6833174
+statepop['IN'] =6732219
+statepop['MO'] =6137428
+statepop['MD'] =6045680
+statepop['WI'] =5822434
+statepop['CO'] =5758736
+statepop['MN'] =5639632
+statepop['SC'] =5148714
+statepop['AL'] =4903185
+statepop['LA'] =4648794
+statepop['KY'] =4467673
+statepop['OR'] =4217737
+statepop['OK'] =3956971
+statepop['CT'] =3565287
+statepop['UT'] =3205958
+statepop['IA'] =3155070
+statepop['PR'] =3193694
+statepop['NV'] =3080156
+statepop['AR'] =3017825
+statepop['MS'] =2976149
+statepop['KS'] =2913314
+statepop['NM'] =2096829
+statepop['NE'] =1934408
+statepop['ID'] =1787065
+statepop['WV'] =1792147
+statepop['HI'] =1415872
+statepop['NH'] =1359711
+statepop['ME'] =1344212
+statepop['MT'] =1068778
+statepop['RI'] =1059361
+statepop['DE'] =973764
+statepop['SD'] =884659
+statepop['ND'] =762062
+statepop['AK'] =731545
+statepop['DC'] =705749
+statepop['VT'] =623989
+statepop['WY'] =578759
+	
+		window.allDatasets = [];
+		window.allDatasetsPerCapita = [];
+		window.newDeathsPerMillion = [];
+		getStateColor = function(s){
+		  var a = s.charCodeAt(0) - 64;
+		  var b = s.charCodeAt(1) - 64;
+          var af = Math.floor(55 + (a * 150) / 26);
+          var bf = Math.floor(85 + (b * 100) / 26);
+          var cf = Math.floor(((a + b) * 256) / 26) % 256;
+          return "rgb(" + af + ", " + bf + ", " + cf + ")";
+		}
+		async function doAllStates(){
+			for(dosi = 0; dosi < allStateCodes.length; dosi++){
+				var currStateCode = allStateCodes[dosi];
+				doState(currStateCode);
+			}
+			await sleep(3000);
+			var config = getBaseConfig("  ", "Deaths per day");
+			config.data.datasets = window.allDatasets;
+			config.data.labels = window.allLabels;
+			var canvasId = "canvasEveryone";
+			var ctx = document.getElementById(canvasId).getContext('2d');
+			window.BasicChart = new Chart(ctx, config);
+
+			var config = getBaseConfig("  ", "Total Deaths Per 100,000 population");
+			config.data.datasets = window.allDatasetsPerCapita;
+			config.data.labels = window.allLabels;
+			var canvasId = "canvasEveryonePerCapita";
+			var ctx = document.getElementById(canvasId).getContext('2d');
+			window.PerCapitaChart = new Chart(ctx, config);
+
+			var config = getBaseConfig("  ", "New Deaths Per 1M population (Past 7 Days)");
+			config.data.datasets = window.newDeathsPerMillion;
+			config.data.labels = window.allLabels;
+			var canvasId = "canvasEveryoneNDPM";
+			var ctx = document.getElementById(canvasId).getContext('2d');
+			window.newDeathsPerMillionChart = new Chart(ctx, config);
+
+		}
+		function doState(stateCode){
+			jQuery.ajax({
+				dataType: "json",
+				url: "https://www.newsbreakapp.com/m/_api/events/virus/state-trend?stateCode="+stateCode,
+				success: async function(data){
+					console.log("got this:");
+					console.log(data);
+					var config = getBaseConfig(stateCode, "New Deaths");
+					config.data.datasets[0].label = stateCode;
+					config.data.datasets[0].data = [];
+					config.data.datasets[1].label = stateCode + "-avg7day";
+					config.data.datasets[1].data = []
+					config.data.labels = [];
+					if (!data.trend){
+						console.log("No trend for:" + stateCode);
+						return;
+					}
+					lastSeven = [0,0,0,0,0,0,0];
+					
+					var configPerCapita = getBaseConfig(stateCode, "Deaths per 100,000 population");
+					configPerCapita.data.datasets[0].label = stateCode; // + ": Total deaths per 100,000 population"
+					configPerCapita.data.datasets[0].data = [];
+					configPerCapita.data.datasets.splice(1,1);
+					
+					configPerCapita.data.labels = [];
+					
+					var configNDPM = getBaseConfig(stateCode, "Deaths per 1M population (past 7 days)");
+					configNDPM.data.datasets[0].label = stateCode; // + ": Total deaths per 100,000 population"
+					configNDPM.data.datasets[0].data = [];
+					configNDPM.data.datasets.splice(1,1);
+					
+					configNDPM.data.labels = [];
+					
+					for (trendi = 0; trendi < data.trend.length -1; trendi++){
+						var trendDate = (data.trend[trendi].dt);
+						var trendDeathTotal = (data.trend[trendi].d);
+						// The charts were hard to follow with huge outliers.
+						// No state had a day over 820, cap the info at 850 
+						// for the "previously unreported" catch-up days
+						var trendDeathNew = (data.trend[trendi].d_b);
+						if (trendDeathNew > 850){
+						  trendDeathNew = 850;
+						}
+						if (trendDeathNew < 0){
+						  trendDeathNew = 0;
+						}
+						lastSeven[trendi % lastSeven.length] = trendDeathNew;
+						lastSevenTotal = lastSeven.reduce(function(a,b){ return a+b;},0);
+						lastSevenAvg = lastSevenTotal / lastSeven.length;
+						config.data.labels.push(trendDate);
+						config.data.datasets[0].data.push(trendDeathNew);
+						config.data.datasets[1].data.push(lastSevenAvg.toFixed(2));
+						// Per capita too hard to read, make it deaths per 100,000
+						var deathPerCapitaTotal = trendDeathTotal / (statepop[stateCode] / 100000)
+						configPerCapita.data.labels.push(trendDate);
+						configPerCapita.data.datasets[0].data.push(deathPerCapitaTotal.toFixed(4));
+						
+						var dpmLastSeven = lastSevenTotal / (statepop[stateCode] / 1000000);
+						configNDPM.data.labels.push(trendDate);
+						configNDPM.data.datasets[0].data.push(dpmLastSeven.toFixed(4));
+					}
+					
+					
+					var canvasId = 'canvas' + stateCode;
+					jQuery("#allCharts").append("<h4>" + stateCode + ":" + statepop[stateCode] + "</h4><canvas id='"+canvasId+"'></canvas><canvas id='"+canvasId+"PerCapita'></canvas>");
+					var ctx = document.getElementById(canvasId).getContext('2d');
+					window.myLine = new Chart(ctx, config);
+					ctxnew = document.getElementById(canvasId+"PerCapita").getContext('2d');
+					window.myLinePerCapita = new Chart(ctxnew, configPerCapita);
+					
+					window.allLabels = config.data.labels;
+					window.allDatasets.push(config.data.datasets[0]);
+					window.allLabelsPerCapita = config.data.labels;
+					window.allDatasetsPerCapita.push(configPerCapita.data.datasets[0]);
+					
+					window.newDeathsPerMillion.push(configNDPM.data.datasets[0]);
+					
+				}
+			});
+		}
+		function getBaseConfig(state, yAxisTitle) {
+			var config = {
+				type: 'line',
+				data: {
+					labels: [],
+					datasets: [{
+						backgroundColor: getStateColor(state),
+						borderColor: getStateColor(state),
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 5,
+						pointHitRadius: 2
+					},{
+						backgroundColor: getStateColor("1"+state),
+						borderColor: getStateColor("2"+state),
+						data: [],
+						fill: false,
+						pointRadius: 2,
+						pointHoverRadius: 5,
+						pointHitRadius: 2
+					}]
+				},
+				options: {
+					responsive: true,
+					title: {
+						display: true,
+						text: ''
+					},
+					tooltips: {
+						intersect: false,
+					},
+					hover: {
+						mode: 'nearest',
+						intersect: true
+					},
+					scales: {
+						xAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: 'Date'
+							}
+						}],
+						yAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: yAxisTitle
+							}
+						}]
+					}
+				}
+			};
+			return config;
+		}
+
+		window.onload = function() {
+			doAllStates();
+		};
+
+/*
+		var colorNames = Object.keys(window.chartColors);
+		document.getElementById('addDataset').addEventListener('click', function() {
+			var colorName = colorNames[config.data.datasets.length % colorNames.length];
+			var newColor = window.chartColors[colorName];
+			var newDataset = {
+				label: 'Dataset ' + config.data.datasets.length,
+				backgroundColor: newColor,
+				borderColor: newColor,
+				data: [],
+				fill: false
+			};
+
+			for (var index = 0; index < config.data.labels.length; ++index) {
+				newDataset.data.push(randomScalingFactor());
+			}
+
+			config.data.datasets.push(newDataset);
+			window.myLine.update();
+		});
+*/
+
+	</script>
+</body>
+
+</html>
