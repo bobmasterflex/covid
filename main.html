@@ -78,7 +78,8 @@ label {
     <div>States Loaded:<span id="statesDone">0</span>
 	<br><textarea rows="4" cols="100" id="stateList"></textarea><br>
 	<button id="setStates">Set States</button>
-	<button id="onAllStates">Turn On All States</button>
+	<button id="onAllStates">All On</button>
+	<button id="offAllStates">All Off</button>
     </div>
 	</div>
 	<br>
@@ -166,6 +167,7 @@ jQuery(document).ready(function(){
   jQuery("#stateCheckboxes input").click(function(a){stateClicked(a);});
   jQuery("#setStates").click(function(a){setStatesByTextarea();});
   jQuery("#onAllStates").click(function(a){setAllStatesTextarea();setStatesByTextarea();});
+  jQuery("#offAllStates").click(function(a){jQuery("#stateList").val("");setStatesByTextarea();});
 });
 setAllStatesTextarea = function(){
   jQuery("#stateList").val("US");
