@@ -443,6 +443,11 @@ statepop['WY'] =578759
 					usData.data.datasets[0].deathsPerDayPM[adid] = usData.data.datasets[0].deathsPerDayRaw[adid] / (statepop['US'] / 1000000);
 					usData.data.datasets[0].deathsPerDayPM[adid] = usData.data.datasets[0].deathsPerDayPM[adid].toFixed(4);
 				}
+				// If we're done then give this day a nicer numbers to display
+				if (adi == 99){
+					usData.data.datasets[0].deathsRollingRaw[adid] = usData.data.datasets[0].deathsRollingRaw[adid].toFixed(4);
+					usData.data.datasets[0].casesRollingRaw[adid] = usData.data.datasets[0].casesRollingRaw[adid].toFixed(4);
+				}
               }
             }
             var config = getBaseConfig("  ", "Deaths per day");
