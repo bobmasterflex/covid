@@ -330,6 +330,72 @@ statepop['AK'] =731545
 statepop['DC'] =705749
 statepop['VT'] =623989
 statepop['WY'] =578759
+
+window.catchUpDays = [];
+catchUpDays['NY'] = [
+	{
+		day:'04/17',
+		type:'death',
+	},{
+		day:'05/06',
+		type:'death'
+	},{
+		day:'05/11',
+		type:'cases'
+	},{
+		day:'05/25',
+		type:'death'
+	},{
+		day:'07/01',
+		type:'death'
+	}
+];
+catchUpDays['NJ'] = [
+	{
+		day:'06/25',
+		type:'death'
+	}
+];
+catchUpDays['AR'] = [
+	{
+		day:'09/16',
+		type:'death'
+	}
+];
+catchUpDays['TX'] = [
+	{
+		day:'07/27',
+		type:'death'
+	},
+	{
+		day:'09/21',
+		type:'cases'
+	}
+];
+catchUpDays['MA'] = [
+	{
+		day:'09/07',
+		type:'cases'
+	}
+];
+catchUpDays['AL'] = [
+	{
+		day:'09/11',
+		type:'death'
+	}
+];
+catchUpDays['DE'] = [
+	{
+		day:'06/12',
+		type:'death'
+	}
+];
+catchUpDays['LA'] = [
+	{
+		day:'06/08',
+		type:'death'
+	}
+];
     
         window.allDatasets_deathsPerDayRaw = [];
         window.allDatasets_casesPerDayRaw = [];
@@ -452,14 +518,17 @@ statepop['WY'] =578759
             }
             var config = getBaseConfig("  ", "Deaths per day");
 			var pullFrom = getBaseConfig("US","US Deaths rolling", usData.data.datasets[0].deathsRollingRaw.slice());
+			pullFrom.data.datasets[0].isDeath = true;
 			pullFrom.data.datasets[0].isRolling = true;
 			pullFrom.data.datasets[0].hidden = true;
             window.allDatasets_deathsPerDayRaw.unshift(pullFrom.data.datasets[0]);
 			var pullFrom = getBaseConfig("US","US Deaths per day", usData.data.datasets[0].deathsPerDayRaw.slice());
+			pullFrom.data.datasets[0].isDeath = true;
 			pullFrom.data.datasets[0].isRolling = false;
 			pullFrom.data.datasets[0].hidden = true;
             window.allDatasets_deathsPerDayRaw.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.allDatasets_deathsPerDayRaw;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasDeathEveryone";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -467,14 +536,17 @@ statepop['WY'] =578759
 
             var config = getBaseConfig("  ", "Cases per day");
 			var pullFrom = getBaseConfig("US","US Cases rolling", usData.data.datasets[0].casesRollingRaw.slice());
+			pullFrom.data.datasets[0].isCases = true;
 			pullFrom.data.datasets[0].isRolling = true;
 			pullFrom.data.datasets[0].hidden = true;
             window.allDatasets_casesPerDayRaw.unshift(pullFrom.data.datasets[0]);
 			var pullFrom = getBaseConfig("US","US Cases per day", usData.data.datasets[0].casesPerDayRaw.slice());
+			pullFrom.data.datasets[0].isCases = true;
 			pullFrom.data.datasets[0].isRolling = false;
 			pullFrom.data.datasets[0].hidden = true;
             window.allDatasets_casesPerDayRaw.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.allDatasets_casesPerDayRaw;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasCasesEveryone";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -485,6 +557,7 @@ statepop['WY'] =578759
 			var pullFrom = getBaseConfig("US","US Deaths Per Capita", usData.data.datasets[0].deathTPC.slice());
             window.allDatasets_deathsPerDayRawPerCapita.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.allDatasets_deathsPerDayRawPerCapita;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasDeathEveryoneTotalPerCapita";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -495,6 +568,7 @@ statepop['WY'] =578759
 			var pullFrom = getBaseConfig("US","US Cases Per Capita", usData.data.datasets[0].caseTPC.slice());
             window.allDatasets_casesPerDayRawPerCapita.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.allDatasets_casesPerDayRawPerCapita;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasCasesEveryoneTotalPerCapita";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -506,6 +580,7 @@ statepop['WY'] =578759
 			pullFrom.data.datasets[0].hidden = true;
             window.allDatasets_DeathsTotal.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.allDatasets_DeathsTotal;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasDeathEveryoneTotalRaw";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -517,6 +592,7 @@ statepop['WY'] =578759
 			pullFrom.data.datasets[0].hidden = true;
             window.allDatasets_CasesTotal.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.allDatasets_CasesTotal;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasCasesEveryoneTotalRaw";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -524,13 +600,16 @@ statepop['WY'] =578759
 
             var config = getBaseConfig("  ", "New Deaths Per 1 Million Population");
 			var pullFrom = getBaseConfig("US","US New Deaths PM", usData.data.datasets[0].deathsPerDayPM.slice());
+			pullFrom.data.datasets[0].isDeath = true;
 			pullFrom.data.datasets[0].isRolling = false;
             window.newDeathsPerCapita.unshift(pullFrom.data.datasets[0]);
 			var pullFrom = getBaseConfig("US","US New Deaths PM Rolling", usData.data.datasets[0].deathsRollingPM.slice());
+			pullFrom.data.datasets[0].isDeath = true;
 			pullFrom.data.datasets[0].isRolling = true;
 			pullFrom.data.datasets[0].hidden = true;
             window.newDeathsPerCapita.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.newDeathsPerCapita;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasDeathEveryoneNDPM";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -538,13 +617,16 @@ statepop['WY'] =578759
             
             var config = getBaseConfig("  ", "New Cases Per 1 Million Population");
 			var pullFrom = getBaseConfig("US","US New Cases PM", usData.data.datasets[0].casesPerDayPM.slice());
+			pullFrom.data.datasets[0].isCases = true;
 			pullFrom.data.datasets[0].isRolling = false;
             window.newCasesPerCapita.unshift(pullFrom.data.datasets[0]);
 			var pullFrom = getBaseConfig("US","US New Cases PM Rolling", usData.data.datasets[0].casesRollingPM.slice());
+			pullFrom.data.datasets[0].isCases = true;
 			pullFrom.data.datasets[0].isRolling = true;
 			pullFrom.data.datasets[0].hidden = true;
             window.newCasesPerCapita.unshift(pullFrom.data.datasets[0]);
             config.data.datasets = window.newCasesPerCapita;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             var canvasId = "canvasCasesEveryoneNDPM";
             var ctx = document.getElementById(canvasId).getContext('2d');
@@ -555,6 +637,7 @@ statepop['WY'] =578759
 			usData.data.datasets[0].data = usData.data.datasets[0].deathPercentCasesTotal;
             window.allDatasets_DpcTotal.unshift(usData.data.datasets[0]);
             config.data.datasets = window.allDatasets_DpcTotal;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             config.options = 
 			{
@@ -630,10 +713,16 @@ statepop['WY'] =578759
 				indivStateConfig.data.datasets[0].caseRolling[adid] = stateCaseRolling;
 				indivStateConfig.data.datasets[0].deathRolling[adid] = stateDeathRolling;
               }
+			  
+			  indivStateConfig.data.datasets[0].isRolling = true;
+			  indivStateConfig.data.datasets[0].isCases = true;
+			  indivStateConfig.data.datasets[0].isDeath = true;
+			  
 			  window.allDatasets_DpcRolling.push(indivStateConfig.data.datasets[0]);
             }
             var config = getBaseConfig("  ", "Deaths as Percent Cases Rolling");
             config.data.datasets = window.allDatasets_DpcRolling;
+			config = addCatchUpDayWarning(config);
             config.data.labels = window.allLabels;
             config.options = 
 			{
@@ -673,11 +762,14 @@ statepop['WY'] =578759
 					mode: 'nearest',
 					callbacks:{
 						afterLabel:function(tooltipItem, data){
-							return "Rolling 7 Avg Deaths:" + data.datasets[tooltipItem.datasetIndex].deathRolling[tooltipItem.index].toFixed(2) + "\n Rolling 7 day Avg Cases:" + data.datasets[tooltipItem.datasetIndex].caseRolling[tooltipItem.index].toFixed(2);
+							var toReturn = [];
+							toReturn.push("Rolling 7 Avg Deaths:" + data.datasets[tooltipItem.datasetIndex].deathRolling[tooltipItem.index].toFixed(2));
+							toReturn.push("Rolling 7 day Avg Cases:" + data.datasets[tooltipItem.datasetIndex].caseRolling[tooltipItem.index].toFixed(2));
 						},
 					}
 				}
 			};
+			config = addCatchUpDayWarning(config);
             var ctx = document.getElementById(canvasId).getContext('2d');
             window.charts[canvasId] = new Chart(ctx, config);
         }
@@ -914,16 +1006,20 @@ statepop['WY'] =578759
                     
                     window.allLabels = configdeathsPerDayRaw.data.labels;
 					
+					configcasesPerDayRaw.data.datasets[0].isCases = true;
 					configcasesPerDayRaw.data.datasets[0].isRolling = false;
 					window.allDatasets_casesPerDayRaw.push(configcasesPerDayRaw.data.datasets[0]);
+					configcasesPerDayRawRolling.data.datasets[0].isCases = true;
 					configcasesPerDayRawRolling.data.datasets[0].hidden = true;
 					configcasesPerDayRawRolling.data.datasets[0].isRolling = true;
                     window.allDatasets_casesPerDayRaw.push(configcasesPerDayRawRolling.data.datasets[0]);
                     
 					configdeathsPerDayRaw.data.datasets[0].isRolling = false;
+					configdeathsPerDayRaw.data.datasets[0].isDeath = true;
                     window.allDatasets_deathsPerDayRaw.push(configdeathsPerDayRaw.data.datasets[0]);
 					configdeathsPerDayRawRolling.data.datasets[0].hidden = true;
 					configdeathsPerDayRawRolling.data.datasets[0].isRolling = true;
+					configdeathsPerDayRawRolling.data.datasets[0].isDeath = true;
                     window.allDatasets_deathsPerDayRaw.push(configdeathsPerDayRawRolling.data.datasets[0]);
                     
                     window.allDatasets_casesPerDayRawPerCapita.push(configCasesPerCapita.data.datasets[0]);
@@ -933,15 +1029,19 @@ statepop['WY'] =578759
                     window.allDatasets_CasesTotal.push(configCasesRaw.data.datasets[0]);
                     
 					configDeathsNDPM.data.datasets[0].isRolling = false;
+					configDeathsNDPM.data.datasets[0].isDeath = true;
                     window.newDeathsPerCapita.push(configDeathsNDPM.data.datasets[0]);
 					configDeathsNDPMRolling.data.datasets[0].hidden = true;
 					configDeathsNDPMRolling.data.datasets[0].isRolling = true;
+					configDeathsNDPMRolling.data.datasets[0].isDeath = true;
                     window.newDeathsPerCapita.push(configDeathsNDPMRolling.data.datasets[0]);
 					
 					configCasesNDPM.data.datasets[0].isRolling = false;
+					configCasesNDPM.data.datasets[0].isCases = true;
                     window.newCasesPerCapita.push(configCasesNDPM.data.datasets[0]);
 					configCasesNDPMRolling.data.datasets[0].hidden = true;
 					configCasesNDPMRolling.data.datasets[0].isRolling = true;
+					configCasesNDPMRolling.data.datasets[0].isCases = true;
                     window.newCasesPerCapita.push(configCasesNDPMRolling.data.datasets[0]);
                     
                     window.allDatasets_DpcTotal.push(configallDatasets_DpcTotal.data.datasets[0]);
@@ -951,6 +1051,77 @@ statepop['WY'] =578759
                 }
             });
         }
+		function addCatchUpDayWarning(config){
+			var orig = function(){};
+			if (typeof config.options.tooltips.callbacks == 'undefined'){
+				config.options.tooltips.callbacks = {};
+			}
+			if (typeof config.options.tooltips.callbacks.afterLabel != 'undefined'){
+				orig = config.options.tooltips.callbacks.afterLabel;
+			}
+			shouldCatchUpTextBeShown = function(catchUpDayLabel, type, tooltipItem, data){
+				if (catchUpDayLabel == tooltipItem.xLabel){
+					var showCatchUp = false;
+					showCatchUp |= showCatchUp || (type == "death" && data.datasets[tooltipItem.datasetIndex].isDeath);
+					showCatchUp |= showCatchUp || (type == "cases" && data.datasets[tooltipItem.datasetIndex].isCases);
+					return showCatchUp;
+				}
+				return false;
+			}
+			config.options.tooltips.callbacks.afterLabel = function(tooltipItem, data){
+				var mainText = orig(tooltipItem, data);
+				var toReturn = [];
+				if (typeof mainText == 'string'){
+					toReturn.push(mainText);
+				}
+				if (typeof mainText == 'array'){
+					toReturn = mainText;
+				}
+				var stateCode = data.datasets[tooltipItem.datasetIndex].label;
+				var isRolling = (typeof data.datasets[tooltipItem.datasetIndex].isRolling != 'undefined') && data.datasets[tooltipItem.datasetIndex].isRolling;
+				var catchUpDaysList = window.catchUpDays[stateCode];
+				if (typeof catchUpDaysList != 'undefined'){
+					if (isRolling){
+						var showCatchUp = false;
+						var catchUpDayToShow = "";
+						//Do for 7 days
+						for (i = 0; i < 7; i++){
+							var dayCheck = (data.labels[tooltipItem.index - i]);
+							var copyTooltipItem = Object.assign({}, tooltipItem);
+							copyTooltipItem.xLabel = dayCheck;
+							for(catchUpDayIndex = 0; catchUpDayIndex < catchUpDaysList.length; catchUpDayIndex++){
+								var catchUpDayLabel = catchUpDaysList[catchUpDayIndex].day;
+								var type = catchUpDaysList[catchUpDayIndex].type;
+								showCatchUp |= shouldCatchUpTextBeShown(catchUpDayLabel, type, copyTooltipItem, data);
+								if (showCatchUp && catchUpDayToShow == ""){
+									catchUpDayToShow = dayCheck;
+								}
+							}
+						}
+						if (showCatchUp){
+							toReturn.push("A 'catch-up' day occurred on:" + catchUpDayToShow);
+							toReturn.push(" The reported number is an adjustment to correct totals.");
+							toReturn.push(" It is not only how many occurred on this specific day.");
+							toReturn.push(" This affects the rolling data giving a 'plateau'");
+						}
+					}else{
+						for(catchUpDayIndex = 0; catchUpDayIndex < catchUpDaysList.length; catchUpDayIndex++){
+							var catchUpDayLabel = catchUpDaysList[catchUpDayIndex].day;
+							var type = catchUpDaysList[catchUpDayIndex].type;
+							var showCatchUp = shouldCatchUpTextBeShown(catchUpDayLabel, type, tooltipItem, data);
+							if (showCatchUp){
+								toReturn.push("This is a 'catch-up' day.");
+								toReturn.push(" The reported number is an adjustment to correct totals.");
+								toReturn.push(" It is not only how many occurred on this specific day.");
+							}
+						}
+					}
+				}
+				return toReturn;
+			}
+			return config;
+			
+		}
 		function addPercentOfToday(config){
 			config.options.tooltips.callbacks = {
 				afterLabel:function(tooltipItem, data){
@@ -1033,16 +1204,25 @@ This data is obtained by your browser (not saved on the server of this page) fro
 <br><br>
 I found it annoying to try to compare states, so I started creating this.
 <br><br>
-
+<h3>Spikes, Plateaus, Negative Numbers</h3>
 Daily data will have information that is used to "catch up" or "issue a correction" to the daily numbers. This causes huge spikes in daily numbers or negatives. But in order to understand the data it is easier to use axis sizes that stop at 0 and a lower number (such as NY/NJ daily death catch ups)
+
+<br><br>
+"Catch up" days are specific to state. Deaths and cases do not have the same "catch up" days.
 <br><br>
 What about the negative 7800+ cases for MA on 9/7? On September 2, 2020, MA reported that it had shifted to using the more restrictive August 6 definition of probable cases released by the CSTE. This change caused a significant decrease in several data points where probable cases or probable deaths were included, particularly the overall case count, which dropped by more than 7,000.
+<br><br>
+The "catch-up" days cause plateaus on rolling data as they are averaged out over the 7 day period.
+<br><br>
+9/23: I've started labelling known "catch up" days, but not all of them.
 </div>
 
 <div id="info7day" style="float:left;padding: 30px;padding-top:0px;margin-bottom:100px;">
+<h3>Weekly Flux and 7 day rolling averages</h3>
 Numbers are under-reported on the weekend, then Monday and Tuesdays are typically catch-up days. This creates wildly spiked charts, so instead, viewing a 7-day rolling window uses the average of the current day and the previous 6 days in order to smooth the numbers into a trend.
 </div>
 <div id="info7day" style="float:left;padding: 30px;padding-top:0px;margin-bottom:100px;">
+<h3>Population data for Per Capita and Per Million Charts</h3>
 State populations are estimates from wikipedia based on US Census data. In these charts, US data does not include Washington, DC. Instead US cases and US deaths is the sum from all of the states for each day. US population is the sum of the estimated populations of the states.
 </div>
 </body>
