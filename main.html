@@ -1101,7 +1101,7 @@ catchUpDays['LA'] = [
 						if (showCatchUp){
 							toReturn.push("A 'catch-up' day occurred on:" + catchUpDayToShow);
 							toReturn.push(" The reported number is an adjustment to correct totals.");
-							toReturn.push(" It is not only how many occurred on this specific day.");
+							toReturn.push(" This corrects the totals from prior missing or incorrect reports.");
 							toReturn.push(" This affects the rolling data giving a 'plateau'");
 						}
 					}else{
@@ -1112,7 +1112,7 @@ catchUpDays['LA'] = [
 							if (showCatchUp){
 								toReturn.push("This is a 'catch-up' day.");
 								toReturn.push(" The reported number is an adjustment to correct totals.");
-								toReturn.push(" It is not only how many occurred on this specific day.");
+								toReturn.push(" This corrects the totals from prior missing or incorrect reports.");
 							}
 						}
 					}
@@ -1219,7 +1219,7 @@ The "catch-up" days cause plateaus on rolling data as they are averaged out over
 
 <div id="info7day" style="float:left;padding: 30px;padding-top:0px;margin-bottom:100px;">
 <h3>Weekly Flux and 7 day rolling averages</h3>
-Numbers are under-reported on the weekend, then Monday and Tuesdays are typically catch-up days. This creates wildly spiked charts, so instead, viewing a 7-day rolling window uses the average of the current day and the previous 6 days in order to smooth the numbers into a trend.
+Numbers are under-reported on the weekend, then Monday and Tuesdays typically report additional numbers from the weekend days. This creates wildly spiked charts, so instead, viewing a 7-day rolling window uses the average of the current day and the previous 6 days in order to smooth the numbers into a trend.
 </div>
 <div id="info7day" style="float:left;padding: 30px;padding-top:0px;margin-bottom:100px;">
 <h3>Population data for Per Capita and Per Million Charts</h3>
