@@ -428,9 +428,6 @@ catchUpDays['LA'] = [
                 await sleep(5); // Usually enough to ensure they are in alphabetical order on the chart
             }
             var start = new Date();
-            while (window.numStatesDone < 50 && (new Date()) - start < 10000){
-              console.log("      numStatesDone:" + window.numStatesDone);
-            }
             console.log("Try 1  numStatesDone:" + window.numStatesDone);
 			// attempt to get the missing items if any
 			var loadedStates = [];
