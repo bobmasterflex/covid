@@ -214,7 +214,7 @@ generateUrl = function(){
 		optionsToTurnOffList.push(jQuery(b).attr('id'));
 	});
 	optionsToTurnOffList.reverse();
-	optionsToTurnOffLine = optionsToTurnOffList.join("|");	
+	optionsToTurnOffLine = optionsToTurnOffList.join("8");	
 	
 	var linkValue = window.location.origin + window.location.pathname + "?config=";
 	linkValue += allStatesConfigLine + "*" + optionsToTurnOffLine;
@@ -231,7 +231,7 @@ setConfig = function(covidConfig){
 	if (splitter.length == 2){
 		var packedStates = splitter[0];
 		var checkedImploded = splitter[1];
-		checked = checkedImploded.split("|");
+		checked = checkedImploded.split("8");
 		createCharts();
 		var binStringTotal = "";
 		for(psi = 0; psi < packedStates.length; psi++){
@@ -616,7 +616,7 @@ catchUpDays['LA'] = [
               }
             }
 			var searchParams = new URLSearchParams(window.location.search);
-			var configToLoad = "US|" + allStateCodes.join("|") + "*hD|hR|hP|hC|hE";
+			var configToLoad = "US|" + allStateCodes.join("|") + "*hD8hR8hP8hC8hE";
 			if (searchParams.has('config')){
 				configToLoad = searchParams.get('config');
 			}
