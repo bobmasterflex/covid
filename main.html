@@ -85,35 +85,40 @@ label {
 	<br>
 	<div id="stateCheckboxes">
 	</div>
-	<div id="chartViewControls">
-      <input type="checkbox" id="hideDeath" hideClass="deaths"><label><span class="stLetters">Hide Deaths</span></label>
-      <input type="checkbox" id="hideCases" hideClass="cases"><label><span class="stLetters">Hide Cases</span></label>
-	  |
-      <input type="checkbox" id="hidePD" hideClass="daily"><label><span class="stLetters">Hide Per Day</span></label>
-      <input type="checkbox" id="hideT" hideClass="total" checked="checked"><label><span class="stLetters">Hide Totals</span></label>
-	  |
-      <input type="checkbox" id="hideR" hideClass="raw"><label><span class="stLetters">Hide Raw</span></label>
-      <input type="checkbox" id="hidePC" hideClass="capita" checked="checked"><label><span class="stLetters">Hide Per Capita / Million</span></label>
-	  |
-      <input type="checkbox" id="hidePercent" hideClass="dpc"><label><span class="stLetters">Hide % Deaths/Case</span></label>
-	</div>
-	<div id="">
-      <input type="checkbox" id="rollingAverage"><label><span class="stLetters">Use 7 Day Rolling Average Instead of Raw Daily Numbers (Only per day, does not affect graphs with totals)</span><a href="#info7day">Why?</a></label>
-	</div>
-	<div id="">
-      <input type="checkbox" id="hideUsOnRaw" checked="checked"><label><span class="stLetters">Hide US On Raw Data</span></label>
-	</div>
-	<div id="chartAxisLimits">
-      <input type="checkbox" id="axisLimits"><label><span class="stLetters">Use Zero as Minimum</span></label><a href="#infoAxisLimits">What?</a>
+	<div id="covidConfigControls">
+		<div id="chartViewControls">
+		  <input type="checkbox" checked="checked" id="hD" hideClass="deaths"><label><span class="stLetters">Hide Deaths</span></label>
+		  <input type="checkbox" checked="checked" id="hC" hideClass="cases"><label><span class="stLetters">Hide Cases</span></label>
+		  |
+		  <input type="checkbox" checked="checked" id="hP" hideClass="daily"><label><span class="stLetters">Hide Per Day</span></label>
+		  <input type="checkbox" checked="checked" id="hT" hideClass="total"><label><span class="stLetters">Hide Totals</span></label>
+		  |
+		  <input type="checkbox" checked="checked" id="hR" hideClass="raw"><label><span class="stLetters">Hide Raw</span></label>
+		  <input type="checkbox" checked="checked" id="hM" hideClass="capita"><label><span class="stLetters">Hide Per Capita / Million</span></label>
+		  |
+		  <input type="checkbox" checked="checked" id="hE" hideClass="dpc"><label><span class="stLetters">Hide % Deaths/Case</span></label>
+		</div>
+		<div id="">
+		  <input type="checkbox" id="r7" checked="checked"><label><span class="stLetters">Use 7 Day Rolling Average Instead of Raw Daily Numbers (Only per day, does not affect graphs with totals)</span><a href="#info7day">Why?</a></label>
+		</div>
+		<div id="">
+		  <input type="checkbox" id="hU" checked="checked"><label><span class="stLetters">Hide US On Raw Data</span></label>
+		</div>
+		<div id="chartAxisLimits">
+		  <input type="checkbox" id="uZ" checked="checked"><label><span class="stLetters">Use Zero as Minimum</span></label><a href="#infoAxisLimits">What?</a>
+		</div>
+		<div id="myGeneratedUrlDiv">Direct link to this view:<br>
+		  <a id="myGeneratedUrlLink" href=""></a><br><br>
+		</div>
 	</div>
 	<div id="spikeExplain">
       <a href="#infoAxisLimits">What's with the huge spikes in numbers?</a>
 	</div>
     <div style="width:99%;" id="allCharts">
-      <div class="mini deaths daily raw">
+      <div class="mini deaths daily raw" style="display:none">
         <canvas id="canvasDeathEveryone"></canvas>
       </div>
-      <div class="mini cases daily raw">
+      <div class="mini cases daily raw" style="display:none">
         <canvas id="canvasCasesEveryone"></canvas>
       </div>
       <div class="mini deaths daily capita" style="display:none">
@@ -134,10 +139,10 @@ label {
       <div class="mini cases total capita" style="display:none">
         <canvas id="canvasCasesEveryoneTotalPerCapita"></canvas>
       </div>
-	  <div class="dpc" style="width:100%;height:500px;float:left;">
+	  <div class="dpc" style="width:100%;height:500px;float:left;display:none;">
         <canvas id="canvasEveryoneallDatasets_DpcTotal"></canvas>
 	  </div>
-	  <div class="dpc" style="width:100%;height:500px;float:left;">
+	  <div class="dpc" style="width:100%;height:500px;float:left;display:none;">
         <canvas id="canvasEveryoneallDatasets_DpcRolling"></canvas>
 	  </div>
     </div>
@@ -146,7 +151,7 @@ label {
     <script>
 jQuery(document).ready(function(){
   jQuery("#chartViewControls input").click(resetHiders);
-  jQuery("#hideUsOnRaw").click(updateAll);
+  jQuery("#hU").click(updateAll);
   setAllStatesTextarea();
   
   var stateCode = "US";
@@ -168,7 +173,97 @@ jQuery(document).ready(function(){
   jQuery("#setStates").click(function(a){setStatesByTextarea();});
   jQuery("#onAllStates").click(function(a){setAllStatesTextarea();setStatesByTextarea();});
   jQuery("#offAllStates").click(function(a){jQuery("#stateList").val("");setStatesByTextarea();});
+  jQuery("input").click(function(){generateUrl();});
+  jQuery("button").click(function(){generateUrl();});
 });
+function dec2bin(dec){
+    return (dec >>> 0).toString(2);
+}
+
+generateUrl = function(){
+	/*
+	var allStatesChecked = [];
+	jQuery("#stateCheckboxes input:checked").each(function(a, b){
+		allStatesChecked.push(jQuery(b).val());
+	});
+	allStatesConfigLine = allStatesChecked.join("|");
+	*/
+	
+	var packedStates = "";	
+	var binRep = "";
+	jQuery("#stateCheckboxes input").each(function(a, b){
+		if (jQuery(b).is(":checked")){
+			binRep += "1";
+		}else{
+			binRep += "0";
+		}
+	});
+	binRep = binRep.padStart(52, '0');
+	console.log("orig:"+binRep);
+	var binRepSections = binRep.match(/.{1,4}/g);
+	for(brsi = 0; brsi < binRepSections.length; brsi++){
+	var myItem = parseInt(binRepSections[brsi], 2);
+	var currLetter = (String.fromCharCode(65 + myItem));
+		packedStates += (currLetter);
+	}
+	allStatesConfigLine = packedStates;
+	console.log("pack:"+packedStates);
+	
+	var optionsToTurnOffList = [];
+	jQuery("#covidConfigControls input:checkbox:not(:checked)").each(function(a, b){
+		optionsToTurnOffList.push(jQuery(b).attr('id'));
+	});
+	optionsToTurnOffList.reverse();
+	optionsToTurnOffLine = optionsToTurnOffList.join("|");	
+	
+	var linkValue = window.location.origin + window.location.pathname + "?config=";
+	linkValue += allStatesConfigLine + "*" + optionsToTurnOffLine;
+	
+	jQuery("#myGeneratedUrlLink").attr('href', linkValue).text(linkValue);
+	
+}
+setConfig = function(covidConfig){
+	// covid config is a string broken up into:
+	// states that are pipe delimited
+	// star
+	// checked ids pipe delimied
+	var splitter = covidConfig.split("*");
+	if (splitter.length == 2){
+		var packedStates = splitter[0];
+		var checkedImploded = splitter[1];
+		checked = checkedImploded.split("|");
+		createCharts();
+		var binStringTotal = "";
+		for(psi = 0; psi < packedStates.length; psi++){
+			var code = (packedStates.charCodeAt(psi));
+			code = code - 65;
+			binStringSection = dec2bin(code);
+			binStringSection = binStringSection.padStart(4,'0');
+			binStringTotal += binStringSection;
+		}		
+		var myUnusedBinString = binStringTotal;
+		var myOutput = [];
+		for (var asci = 1; asci <= allStateCodes.length; asci++){
+			var currCheck = myUnusedBinString.substring(myUnusedBinString.length-1);
+			myUnusedBinString = myUnusedBinString.substring(0, myUnusedBinString.length-1);
+			if (currCheck == "1"){
+				myOutput.unshift(allStateCodes[allStateCodes.length - asci]);
+			}
+		}
+		currCheck = myUnusedBinString.substring(myUnusedBinString.length-1);
+		if (currCheck == "1"){
+			myOutput.unshift("US");
+		}
+		commaDelimStates = myOutput.join(", ");		
+		jQuery("textarea").val(commaDelimStates);
+		setStatesByTextarea();
+		for (var ci = 0; ci < checked.length; ci++){
+			if (checked[ci].length > 0){
+				jQuery("#" + checked[ci]).click();
+			}
+		}
+	}
+}
 setAllStatesTextarea = function(){
   jQuery("#stateList").val("US");
   var toAdd = ", ";
@@ -202,7 +297,7 @@ setTextareaByCB = function(){
 }
 useUsOnRaw = function(){
 	if (jQuery("#statecbUS:checked").length == 1){
-		var hideUs = (jQuery("#hideUsOnRaw:checked").length == 1);
+		var hideUs = (jQuery("#hU:checked").length == 1);
 		setStateByChart(window.charts.canvasCasesEveryone, 'US', !hideUs);
 		setStateByChart(window.charts.canvasDeathEveryone, 'US', !hideUs);
 		setStateByChart(window.charts.canvasCasesEveryoneTotalRaw, 'US', !hideUs);
@@ -234,7 +329,7 @@ turnOnStates = function(myChart, stateCodeArray, suppressUpdate){
 	  var ignores7dayCB = (typeof myChart.data.datasets[i].ignores7dayCB != 'undefined') && myChart.data.datasets[i].ignores7dayCB;
 	  
 	  if (typeof(myChart.data.datasets[i].isRolling) == "boolean" && !ignores7dayCB){
-		var useRolling = jQuery("#rollingAverage:checked").length == 1;
+		var useRolling = jQuery("#r7:checked").length == 1;
 		if (myChart.data.datasets[i].isRolling && useRolling){
 		   myChart.getDatasetMeta(i).hidden = false;
 		}else if(!myChart.data.datasets[i].isRolling && !useRolling){
@@ -453,8 +548,8 @@ catchUpDays['LA'] = [
 
 			
 			
-			jQuery("#axisLimits").click(function(){useSensibleAxisLimits();});
-			jQuery("#rollingAverage").click(function(){useRollingAverages();});
+			jQuery("#uZ").click(function(){useSensibleAxisLimits();});
+			jQuery("#r7").click(function(){useRollingAverages();});
             window.usData = getBaseConfig("", "US Data");
             usData.data.datasets[0].label = "US";
             usData.data.datasets[0].deathPercentCasesTotal = [];
@@ -520,6 +615,15 @@ catchUpDays['LA'] = [
 				}
               }
             }
+			var searchParams = new URLSearchParams(window.location.search);
+			var configToLoad = "US|" + allStateCodes.join("|") + "*hD|hR|hP|hC|hE";
+			if (searchParams.has('config')){
+				configToLoad = searchParams.get('config');
+			}
+			setConfig(configToLoad);
+			generateUrl();
+		}
+		createCharts = function(){
             var config = getBaseConfig("  ", "Deaths per day");
 			var pullFrom = getBaseConfig("US","US Deaths rolling", usData.data.datasets[0].deathsRollingRaw.slice());
 			pullFrom.data.datasets[0].isDeath = true;
@@ -798,7 +902,7 @@ catchUpDays['LA'] = [
 			}
 		}
 		useRollingAverages = function(){
-			useRolling = jQuery("#rollingAverage:checked").length == 1;
+			useRolling = jQuery("#r7:checked").length == 1;
 			for (var i = 0; i < 102; i++){
 				useRollingAveragesWithCheckChart(useRolling, window.charts.canvasCasesEveryone, i);
 				useRollingAveragesWithCheckChart(useRolling, window.charts.canvasDeathEveryone, i);
@@ -808,7 +912,7 @@ catchUpDays['LA'] = [
 			updateAll();
 		}
 		useSensibleAxisLimits = function(){
-          if (jQuery("#axisLimits").prop("checked")){
+          if (jQuery("#uZ").prop("checked")){
 		    if (typeof(window.charts.canvasDeathEveryone.config.options.scales.yAxes[0].ticks.min) == 'undefined'){
               window.charts.canvasDeathEveryone.config.options.scales.yAxes[0].ticks.min = 0;
               //window.charts.canvasDeathEveryone.config.options.scales.yAxes[0].ticks.max = 850;
