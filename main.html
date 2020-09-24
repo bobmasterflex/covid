@@ -425,7 +425,7 @@ catchUpDays['LA'] = [
             for(dosi = 0; dosi < allStateCodes.length; dosi++){
                 var currStateCode = allStateCodes[dosi];
                 doState(currStateCode);
-                await sleep(50); // Usually enough to ensure they are in alphabetical order on the chart
+                await sleep(500); // Usually enough to ensure they are in alphabetical order on the chart
             }
             var start = new Date();
             while (window.numStatesDone < 50 && (new Date()) - start < 10000){
