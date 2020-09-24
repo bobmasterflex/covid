@@ -231,7 +231,9 @@ resetHiders = function(){
 turnOnStates = function(myChart, stateCodeArray, suppressUpdate){
   for (var i = 0; i < myChart.data.datasets.length; i++){
     if (stateCodeArray.includes(myChart.data.datasets[i].label)){
-	  if (typeof(myChart.data.datasets[i].isRolling) == "boolean"){
+	  var ignores7dayCB = (typeof myChart.data.datasets[i].ignores7dayCB != 'undefined') && myChart.data.datasets[i].ignores7dayCB;
+	  
+	  if (typeof(myChart.data.datasets[i].isRolling) == "boolean" && !ignores7dayCB){
 		var useRolling = jQuery("#rollingAverage:checked").length == 1;
 		if (myChart.data.datasets[i].isRolling && useRolling){
 		   myChart.getDatasetMeta(i).hidden = false;
@@ -431,7 +433,7 @@ catchUpDays['LA'] = [
             console.log("Try 1  numStatesDone:" + window.numStatesDone);
 			// attempt to get the missing items if any
 			var loadedStates = [];
-			var tryNumber = 1;
+			var tryNumber = 2;
 			while (tryNumber < 30 && window.numStatesDone < 50){
 				await sleep(500);
 				
@@ -719,6 +721,7 @@ catchUpDays['LA'] = [
 			  indivStateConfig.data.datasets[0].isRolling = true;
 			  indivStateConfig.data.datasets[0].isCases = true;
 			  indivStateConfig.data.datasets[0].isDeath = true;
+			  indivStateConfig.data.datasets[0].ignores7dayCB = true;
 			  
 			  window.allDatasets_DpcRolling.push(indivStateConfig.data.datasets[0]);
             }
