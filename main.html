@@ -75,11 +75,21 @@ label {
 </head>
 
 <body>
+	<div style="width:717px;">
     <div>States Loaded:<span id="statesDone">0</span>
 	<br><textarea rows="4" cols="100" id="stateList"></textarea><br>
-	<button id="setStates">Set States</button>
-	<button id="onAllStates">All On</button>
-	<button id="offAllStates">All Off</button>
+		<div style="float:left">
+			<button id="setStates">Set States</button>
+			<button id="onAllStates">All On</button>
+			<button id="offAllStates">All Off</button>
+		</div>
+		<div style="float:right">
+			<select id="startDate"></select>
+			<select id="endDate"></select>
+			<button id="setPeriod">Set Date Period</button>
+		</div>
+<br>		
+	</div>
     </div>
 	</div>
 	<br>
@@ -199,7 +209,7 @@ generateUrl = function(){
 		}
 	});
 	binRep = binRep.padStart(52, '0');
-	console.log("orig:"+binRep);
+	//console.log("orig:"+binRep);
 	var binRepSections = binRep.match(/.{1,4}/g);
 	for(brsi = 0; brsi < binRepSections.length; brsi++){
 	var myItem = parseInt(binRepSections[brsi], 2);
@@ -207,7 +217,7 @@ generateUrl = function(){
 		packedStates += (currLetter);
 	}
 	allStatesConfigLine = packedStates;
-	console.log("pack:"+packedStates);
+	//console.log("pack:"+packedStates);
 	
 	var optionsToTurnOffList = [];
 	jQuery("#covidConfigControls input:checkbox:not(:checked)").each(function(a, b){
@@ -218,6 +228,15 @@ generateUrl = function(){
 	
 	var linkValue = window.location.origin + window.location.pathname + "?config=";
 	linkValue += allStatesConfigLine + "*" + optionsToTurnOffLine;
+
+	linkValue += "*";
+	var stsi = jQuery("#startDate").prop('selectedIndex');
+	linkValue += String.fromCharCode(Math.floor(stsi/26) + 65);
+	linkValue += String.fromCharCode(Math.floor(stsi%26) + 65);
+	
+	var etsi = jQuery("#endDate").prop('selectedIndex');
+	linkValue += String.fromCharCode(Math.floor(etsi/26) + 65);
+	linkValue += String.fromCharCode(Math.floor(etsi%26) + 65);
 	
 	jQuery("#myGeneratedUrlLink").attr('href', linkValue).text(linkValue);
 	
@@ -228,9 +247,13 @@ setConfig = function(covidConfig){
 	// star
 	// checked ids pipe delimied
 	var splitter = covidConfig.split("*");
-	if (splitter.length == 2){
+	if (splitter.length > 1){
 		var packedStates = splitter[0];
 		var checkedImploded = splitter[1];
+		var packedDates = "";
+		if (splitter.length > 2){
+			packedDates = splitter[2];
+		}
 		checked = checkedImploded.split("8");
 		createCharts();
 		var binStringTotal = "";
@@ -262,6 +285,15 @@ setConfig = function(covidConfig){
 				jQuery("#" + checked[ci]).click();
 			}
 		}
+		useSensibleAxisLimits();
+		console.log("Packed Dates:" + packedDates);
+		if (packedDates.length == 4){
+			startDateIndex = (packedDates.charCodeAt(0) - 65) * 26 + (packedDates.charCodeAt(1) - 65);
+			endDateIndex = (packedDates.charCodeAt(2) - 65) * 26 + (packedDates.charCodeAt(3) - 65);
+			jQuery("#startDate").prop('selectedIndex', startDateIndex);
+			jQuery("#endDate").prop('selectedIndex', endDateIndex);
+		}
+		loadDateSet();
 	}
 }
 setAllStatesTextarea = function(){
@@ -616,12 +648,36 @@ catchUpDays['LA'] = [
               }
             }
 			var searchParams = new URLSearchParams(window.location.search);
+			initiateDateSet();
+			jQuery("#setPeriod").click(function(){
+				loadDateSet();
+				generateUrl();
+			});
 			var configToLoad = "US|" + allStateCodes.join("|") + "*hD8hR8hP8hC8hE";
 			if (searchParams.has('config')){
 				configToLoad = searchParams.get('config');
 			}
+			
 			setConfig(configToLoad);
 			generateUrl();
+		}
+		initiateDateSet = function(){
+			var currDate = "";
+			for(var wali = 0; wali < window.allLabels.length; wali++){
+				currDate = window.allLabels[wali];
+				jQuery("#startDate").append("<option>" + currDate + "</option>");
+				jQuery("#endDate").append("<option>" + currDate + "</option>");
+			}
+			jQuery("#endDate").val(currDate);
+		}
+		loadDateSet = function(){
+			var sd = jQuery("#startDate").val();
+			var ed = jQuery("#endDate").val();
+			Object.keys(window.charts).forEach(function(val, index){
+				window.charts[val].config.options.scales.xAxes[0].ticks.min = sd;
+				window.charts[val].config.options.scales.xAxes[0].ticks.max = ed;
+			});
+			updateAll();
 		}
 		createCharts = function(){
             var config = getBaseConfig("  ", "Deaths per day");
