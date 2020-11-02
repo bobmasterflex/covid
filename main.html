@@ -526,6 +526,12 @@ catchUpDays['LA'] = [
 		day:'06/08',
 		type:'death'
 	}
+catchUpDays['WV'] = [
+	{
+		day:'04/02',
+		type:'cases',
+		specialText:'Data between total and a calculated day by day aggregate breaks on this day. This is an issue with the data source. The data show on this day is as it appears as listed in totals data'
+	}
 ];
     
         window.allDatasets_deathsPerDayRaw = [];
@@ -1266,7 +1272,7 @@ catchUpDays['LA'] = [
 							for(catchUpDayIndex = 0; catchUpDayIndex < catchUpDaysList.length; catchUpDayIndex++){
 								var catchUpDayLabel = catchUpDaysList[catchUpDayIndex].day;
 								var type = catchUpDaysList[catchUpDayIndex].type;
-								showCatchUp |= shouldCatchUpTextBeShown(catchUpDayLabel, type, copyTooltipItem, data);
+								showCatchUp |= (shouldCatchUpTextBeShown(catchUpDayLabel, type, copyTooltipItem, data) != false);
 								if (showCatchUp && catchUpDayToShow == ""){
 									catchUpDayToShow = dayCheck;
 								}
@@ -1282,11 +1288,14 @@ catchUpDays['LA'] = [
 						for(catchUpDayIndex = 0; catchUpDayIndex < catchUpDaysList.length; catchUpDayIndex++){
 							var catchUpDayLabel = catchUpDaysList[catchUpDayIndex].day;
 							var type = catchUpDaysList[catchUpDayIndex].type;
+							var specialText = catchUpDaysList[catchUpDayIndex].specialText;
 							var showCatchUp = shouldCatchUpTextBeShown(catchUpDayLabel, type, tooltipItem, data);
-							if (showCatchUp){
+							if (showCatchUp == true){
 								toReturn.push("This is a 'catch-up' day.");
 								toReturn.push(" The reported number is an adjustment to correct totals.");
 								toReturn.push(" This corrects the totals from prior missing or incorrect reports.");
+							} else if (showCatchUp != false){  // If special text
+								toReturn.push(specialText);
 							}
 						}
 					}
