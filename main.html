@@ -604,7 +604,11 @@ catchUpDays['LA'] = [
                 usData.data.datasets[0].deathTotal[adid] += window.allDatasets_DpcTotal[adi].deathTotal[adid];
 				usData.data.datasets[0].deathTPC[adid] = usData.data.datasets[0].deathTotal[adid] / statepop['US'];
 				usData.data.datasets[0].deathTPC[adid] = usData.data.datasets[0].deathTPC[adid].toFixed(8);
-                usData.data.datasets[0].deathPercentCasesTotal[adid] = ((100 * usData.data.datasets[0].deathTotal[adid]) / usData.data.datasets[0].caseTotal[adid]).toFixed(8);
+				if (usData.data.datasets[0].caseTotal[adid] != 0){
+					usData.data.datasets[0].deathPercentCasesTotal[adid] = ((100 * usData.data.datasets[0].deathTotal[adid]) / usData.data.datasets[0].caseTotal[adid]).toFixed(8);
+				} else{
+					usData.data.datasets[0].deathPercentCasesTotal[adid] = 0;
+				}
               }
             }
 			usData.data.datasets[0].casesRollingRaw = [];
@@ -1165,7 +1169,10 @@ catchUpDays['LA'] = [
                         configCasesNDPMRolling.data.labels.push(trendDate);
                         configCasesNDPMRolling.data.datasets[0].data.push(lastSevenCasesPM.toFixed(4));
                         
-                        var dpc = trendDeathTotal * 100 / trendCaseTotal;
+						var dpc = 0;
+						if (trendCaseTotal != 0){
+							dpc = trendDeathTotal * 100 / trendCaseTotal;
+						}
                         configallDatasets_DpcTotal.data.datasets[0].data.push(dpc.toFixed(8));
                         configallDatasets_DpcTotal.data.datasets[0].caseTotal.push(trendCaseTotal);
                         configallDatasets_DpcTotal.data.datasets[0].deathTotal.push(trendDeathTotal);
