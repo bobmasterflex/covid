@@ -666,7 +666,8 @@ catchUpDays['WV'] = [
 				loadDateSet();
 				generateUrl();
 			});
-			var configToLoad = "US|" + allStateCodes.join("|") + "*hD8hR8hP8hC8hE";
+			// All data was taking a bit to load. Gives a bad first impression
+			var configToLoad = "EACAAEAAAAAIA*hE8hM8hR8hP8hC8hD*AAJR";//"HPPPPPPPPPPPP" + "*hD8hR8hP8hC8hE";
 			if (searchParams.has('config')){
 				configToLoad = searchParams.get('config');
 			}
